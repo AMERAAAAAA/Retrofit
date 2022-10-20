@@ -11,9 +11,13 @@ import android.os.Parcelable;
 
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -66,9 +70,19 @@ public class MainActivity extends AppCompatActivity implements movie_adapter.OnI
     private void getMovies() {
         final ProgressDialog loading = ProgressDialog.show( this, "Fetching Data", "Please Wait...", false, false );
 
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+// set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+// add your other interceptors …
+// add logging as last interceptor
+        httpClient.addInterceptor(logging);
+
+
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl( "https://api.themoviedb.org/3/movie/now_playing?" )
-                .addConverterFactory( GsonConverterFactory.create() ).build();
+                .baseUrl( "https://api.themoviedb.org/3/" )
+                .addConverterFactory( GsonConverterFactory.create() )
+                .client(httpClient.build()).build();
 
         retrofit_Interface movie_api = retrofit.create( retrofit_Interface.class );
 
